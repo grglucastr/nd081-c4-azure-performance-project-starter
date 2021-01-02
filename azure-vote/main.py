@@ -22,17 +22,18 @@ from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 
 
 # Logging
-logger = logging
+logger = logging.getLogger(__name__)
+logger.addHandler(AzureLogHandler(connection_string='InstrumentationKey=05c952e8-692e-40f3-90fd-94b8c577db73'))
 
 # Metrics
 exporter = metrics_exporter.new_metrics_exporter(
   enable_standard_metrics=True,
-  connection_string='InstrumentationKey=05c952e8-692e-40f3-90fd-94b8c577db73;IngestionEndpoint=https://eastus2-0.in.applicationinsights.azure.com/')
+  connection_string='InstrumentationKey=05c952e8-692e-40f3-90fd-94b8c577db73')
 
 # Tracing
 tracer = Tracer(
     exporter=AzureExporter(
-        connection_string='InstrumentationKey=05c952e8-692e-40f3-90fd-94b8c577db73;IngestionEndpoint=https://eastus2-0.in.applicationinsights.azure.com/'),
+        connection_string='InstrumentationKey=05c952e8-692e-40f3-90fd-94b8c577db73'),
     sampler=ProbabilitySampler(1.0),
 )
 
@@ -41,7 +42,7 @@ app = Flask(__name__)
 # Requests
 middleware = FlaskMiddleware(
     app,
-    exporter=AzureExporter(connection_string="InstrumentationKey=05c952e8-692e-40f3-90fd-94b8c577db73;IngestionEndpoint=https://eastus2-0.in.applicationinsights.azure.com/"),
+    exporter=AzureExporter(connection_string="InstrumentationKey=05c952e8-692e-40f3-90fd-94b8c577db73"),
     sampler=ProbabilitySampler(rate=1.0),
 )
 
@@ -120,6 +121,6 @@ def index():
 
 if __name__ == "__main__":
     # comment line below when deploying to VMSS
-    #app.run() # local
+    app.run() # local
     # uncomment the line below before deployment to VMSS
-    app.run(host='0.0.0.0', threaded=True, debug=True) # remote
+    #app.run(host='0.0.0.0', threaded=True, debug=True) # remote
